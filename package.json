@@ -1,0 +1,26 @@
+{
+  "name": "crypto-profit-bot",
+  "version": "1.0.0",
+  "description": "Telegram bot for tracking crypto portfolio profits and calculating withdrawals",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js",
+    "dev": "nodemon bot.js"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "crypto",
+    "portfolio",
+    "profit"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "node-telegram-bot-api": "^0.64.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
