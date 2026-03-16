@@ -83,7 +83,29 @@ Let's start! Use /add to add your first coin.
 
 // /help command
 bot.onText(/\/help/, (msg) => {
-    bot.emit('text', { ...msg, text: '/start' });
+    const chatId = msg.chat.id;
+    const user = getUser(chatId);
+
+    const welcome = `
+🚀 *Ossycodes Crypto Profit Calculator Bot*
+
+Track your portfolio, calculate profits, and know exactly how much to sell! created by Emmanuel (ossycodes)
+
+*Commands:*
+/add - Add a coin to your portfolio
+/portfolio - View your portfolio & profits
+/update - Update a coin's current price
+/withdraw - Calculate how much to sell
+/setrate - Set USD to NGN rate
+/clear - Clear your portfolio
+/help - Show this message
+
+*Current NGN Rate:* ₦${formatNum(user.ngnRate)} per $1
+
+Let's start! Use /add to add your first coin.
+`;
+
+    bot.sendMessage(chatId, welcome, { parse_mode: 'Markdown' });
 });
 
 // /add command - Start adding a coin
@@ -185,7 +207,9 @@ bot.onText(/\/withdraw/, (msg) => {
         const profit = data.currentPriceUsd - data.buyPriceUsd;
         if (profit > 0) {
             hasProfitableCoins = true;
-            profitableLines.push(`🟢 *${coin}*: +$${formatNum(profit)} ✓`);
+            const pricePerCoin = data.currentPriceUsd / data.amount;
+            const profitInCoin = profit / pricePerCoin;
+            profitableLines.push(`🟢 *${coin}*: +$${formatNum(profit)} (${profitInCoin.toFixed(8)} ${coin}) ✓`);
         } else {
             noProfitLines.push(`🔴 *${coin}*: $${formatNum(profit)} (no profit)`);
         }
@@ -409,10 +433,14 @@ Use /portfolio to see your full portfolio.`,
             
             user.temp.coin = withdrawCoin;
             user.state = STATES.AWAITING_WITHDRAW_AMOUNT;
-            
+
+            const recommended = Math.max(0, coinProfit - 2);
+            const recPricePerCoin = user.portfolio[withdrawCoin].currentPriceUsd / user.portfolio[withdrawCoin].amount;
+            const recCoinAmount = recommended / recPricePerCoin;
+
             bot.sendMessage(
                 chatId,
-                `💵 *Withdraw from ${withdrawCoin}*\n\nAvailable profit: $${formatNum(coinProfit)} (₦${formatNum(coinProfit * user.ngnRate)})\n\nHow much USD do you want to withdraw?`,
+                `💵 *Withdraw from ${withdrawCoin}*\n\nAvailable profit: $${formatNum(coinProfit)} (₦${formatNum(coinProfit * user.ngnRate)})\n\n💡 *Recommended (profit - $2):* $${formatNum(recommended)} = ${recCoinAmount.toFixed(8)} ${withdrawCoin}\n\nHow much USD do you want to withdraw?`,
                 { parse_mode: 'Markdown' }
             );
             break;
